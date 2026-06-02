@@ -1,0 +1,139 @@
+/* Import Design Tokens */
+@import './variables.css';
+@import './responsive.css';
+
+/* Legacy variables - sẽ được migrate dần sang variables.css */
+:root {
+  --bg-color: var(--color-white);
+  --border-color: var(--color-gray-300);
+  --primary-red: var(--color-danger);
+  --text-dark: var(--color-gray-800);
+  --text-light: var(--color-gray-600);
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  color: var(--text-dark);
+  background-color: var(--bg-color);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+/* Header Styles */
+.main-header {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 30px;
+}
+
+.nav-bar {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-pill {
+  color: var(--text-dark);
+  padding: 8px 16px;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.nav-item.active .nav-pill {
+  background-color: var(--primary-red);
+  color: white;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* Layout Utilities */
+.page-container {
+  display: flex;
+  gap: 40px;
+  width: 100%;
+}
+
+.left-panel {
+  width: 250px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-color);
+  padding-right: 20px;
+}
+
+.right-panel {
+  flex: 1;
+}
+
+/* Auth Styles */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 400px;
+  padding: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.auth-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.btn-primary {
+  background-color: var(--primary-red);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}

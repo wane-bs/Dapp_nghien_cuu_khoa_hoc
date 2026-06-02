@@ -1,0 +1,13 @@
+# Features Layer - Phase 2 (Feature-Sliced Design)
+# 
+# Sẽ chứa các chức năng nghiệp vụ tương tác khi team design ready:
+# - AuthForm/        (Login/Register forms)
+# - RentBookFlow/    (Rent a book workflow)
+# - PaymentFlow/     (Payment processing)
+# - ContractSign/    (Contract signing)
+# 
+# Quy tắc:
+# - Features chứa business logic có UI
+# - Có thể có state management
+# - Có thể import từ: entities/, shared/
+# - KHÔNG được import từ: widgets/, pages/

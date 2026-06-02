@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VinaLib Vault - Minimal Test UI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <style>
+        :root { 
+            --primary: #8b5cf6; 
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #0f172a; 
+            --panel: rgba(30, 41, 59, 0.7); 
+            --text: #f8fafc; 
+        }
+        body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            padding: 2rem; 
+            margin: 0;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .glass-panel { 
+            background: var(--panel); 
+            backdrop-filter: blur(12px); 
+            border-radius: 16px; 
+            padding: 2rem; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            margin-bottom: 2rem; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        h1, h2, h3 { margin-top: 0; }
+        button { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.2s; 
+        }
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        button:disabled { background: #475569; cursor: not-allowed; transform: none; }
+        button.success { background: var(--success); }
+        button.danger { background: var(--danger); }
+        input { 
+            width: 100%; 
+            padding: 0.75rem; 
+            margin-bottom: 1rem; 
+            border-radius: 8px; 
+            border: 1px solid #334155; 
+            background: #1e293b; 
+            color: white; 
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; background: #334155; font-size: 0.875rem; font-weight: bold;}
+        .log-box { background: #000; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.85rem; height: 150px; overflow-y: auto; color: #10b981;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📚 VinaLib Smart Vault UI</h1>
+                <span class="status-badge" id="networkStatus">🔴 Disconnected</span>
+            </div>
+            <button id="btnConnect">Connect MetaMask</button>
+        </div>
+
+        <div class="glass-panel">
+            <h2>⚙️ Cấu hình Hệ thống</h2>
+            <input type="text" id="contractAddress" placeholder="[Testnet] VinaLibVault Address (e.g., 0x...)" value="">
+            <p style="font-size: 0.85rem; color: #94a3b8;">Lưu ý: Bạn cần deploy Contract lên Base Sepolia/Localhost và dán địa chỉ vào đây trước khi tương tác.</p>
+        </div>
+
+        <div class="grid">
+            <!-- RENTER SECTION -->
+            <div class="glass-panel">
+                <h2>📱 Giao diện Người Thuê</h2>
+                <div>
+                    <label>Book Token ID:</label>
+                    <input type="number" id="bookId" value="0">
+                </div>
+                <div>
+                    <label>Duration (Seconds):</label>
+                    <input type="number" id="duration" value="86400">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button id="btnRent" style="flex: 1;">Xác nhận Thuê (createRental)</button>
+                    <button id="btnRequestReturn" class="danger" style="flex: 1;">Trả Sách (requestReturn)</button>
+                </div>
+            </div>
+
+            <!-- IOT / ADMIN SECTION -->
+            <div class="glass-panel">
+                <h2>🤖 Tủ Sách IoT (Oracle/Admin)</h2>
+                <div>
+                    <label>Book Token ID cần xác nhận:</label>
+                    <input type="number" id="iotBookId" value="0">
+                </div>
+                <div>
+                    <label>Trạng thái vật lý:</label>
+                    <select id="isDamaged" style="width: 100%; padding: 0.75rem; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 8px; margin-bottom: 1rem;">
+                        <option value="false">Bình thường (Không hư hại)</option>
+                        <option value="true">Sách rách/hư hỏng (Damaged)</option>
+                    </select>
+                </div>
+                <button id="btnConfirmReturn" class="success" style="width: 100%;">Tủ IoT Xác nhận (confirmReturn)</button>
+            </div>
+        </div>
+
+        <div class="glass-panel">
+            <h2>📜 Transaction Logs (Feedback Loop)</h2>
+            <div class="log-box" id="logger">
+                <div style="color: #64748b;">Waiting for operations...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ABI Manifest extracted from PROJECT_MANIFEST_REFACTORED.json
+        const ABI = [
+            "function createRental(address user, uint256 bookTokenId, uint64 duration, bytes32 termsHash, uint16 version, string memory pspRef, uint256 existingSbtId) external",
+            "function requestReturn(uint256 bookTokenId, bytes32 deliveryHash) external",
+            "function confirmReturn(uint256 bookTokenId, bool isDamaged, string memory notes) external",
+            "function isAvailable(uint256 bookTokenId) external view returns (bool)"
+        ];
+
+        let provider, signer, contract;
+
+        const logger = document.getElementById('logger');
+        function log(msg) {
+            logger.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+            logger.scrollTop = logger.scrollHeight;
+        }
+
+        document.getElementById('btnConnect').addEventListener('click', async () => {
+            if (window.ethereum) {
+                try {
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    signer = await provider.getSigner();
+                    const address = await signer.getAddress();
+                    
+                    document.getElementById('networkStatus').innerText = `🟢 Connected: ${address.substring(0, 6)}...`;
+                    document.getElementById('networkStatus').style.background = '#10b981';
+                    log(`Wallet connected: ${address}`);
+                    
+                    const contractAddr = document.getElementById('contractAddress').value;
+                    if(contractAddr) {
+                        contract = new ethers.Contract(contractAddr, ABI, signer);
+                        log('Contract initialized.');
+                    } else {
+                        log('Awaiting contract address input.');
+                    }
+                } catch (error) {
+                    log(`<span style="color: #ef4444;">Connection failed: ${error.message}</span>`);
+                }
+            } else {
+                alert('Vui lòng cài đặt MetaMask!');
+            }
+        });
+
+        document.getElementById('contractAddress').addEventListener('change', (e) => {
+            if(signer && e.target.value) {
+                contract = new ethers.Contract(e.target.value, ABI, signer);
+                log(`Contract interface updated: ${e.target.value}`);
+            }
+        });
+
+        // 1. Renter Action: Create Rental
+        document.getElementById('btnRent').addEventListener('click', async () => {
+            if(!contract) return alert('Connect wallet & enter contract address first!');
+            try {
+                const bookId = document.getElementById('bookId').value;
+                const duration = document.getElementById('duration').value;
+                
+                // Mocks parameters
+                const termsHash = ethers.id("Sample IoT Terms");
+                log(`Mô phỏng Giao dịch: Đang đóng gói yêu cầu thuê Book #${bookId}...`);
+                
+                // Trùng khớp signature manifest: user, bookId, duration, termsHash, version, pspRef, sbtId
+                const tx = await contract.createRental(
+                    await signer.getAddress(), 
+                    bookId, 
+                    duration, 
+                    termsHash, 
+                    1, 
+                    "WEB-01", 
+                    0
+                );
+                log(`TX Submitted: <a href="#" style="color:#60a5fa">${tx.hash}</a>`);
+                await tx.wait();
+                log(`<span style="color: #10b981;">✅ Trạng thái (On-chain): Smart Contract ghi nhận quyền mượn sách.</span>`);
+            } catch(e) {
+                log(`<span style="color: #ef4444;">Error: ${e.message}</span>`);
+            }
+        });
+
+        // 2. Renter Action: Request Return
+        document.getElementById('btnRequestReturn').addEventListener('click', async () => {
+            if(!contract) return alert('Connect wallet & enter contract address first!');
+            try {
+                const bookId = document.getElementById('bookId').value;
+                const deliveryHash = ethers.id("AppReturnConfirm");
+                log(`Mô phỏng Giao dịch: Đang yêu cầu trả sách #${bookId}...`);
+                
+                const tx = await contract.requestReturn(bookId, deliveryHash);
+                log(`TX Submitted: <a href="#" style="color:#60a5fa">${tx.hash}</a>`);
+                await tx.wait();
+                log(`<span style="color: #10b981;">✅ Trạng thái (App): Người dùng yêu cầu mở cửa tủ. Chờ tủ IoT nhận diện sách.</span>`);
+            } catch(e) {
+                log(`<span style="color: #ef4444;">Error: ${e.message}</span>`);
+            }
+        });
+
+        // 3. IoT Action: Confirm Return
+        document.getElementById('btnConfirmReturn').addEventListener('click', async () => {
+            if(!contract) return alert('Connect wallet & enter contract address first!');
+            try {
+                const bookId = document.getElementById('iotBookId').value;
+                const isDamaged = document.getElementById('isDamaged').value === 'true';
+                
+                log(`[Tủ IoT Edge] Đóng cửa tủ. Đang chạy kiểm tra Image Sensor (Hư hại: ${isDamaged}). Gửi lệnh lên Blockchain...`);
+                
+                const tx = await contract.confirmReturn(bookId, isDamaged, "Được xác nhận bởi Tủ 1");
+                log(`TX Submitted: <a href="#" style="color:#60a5fa">${tx.hash}</a>`);
+                await tx.wait();
+                log(`<span style="color: #10b981;">✅ Vòng lặp Feedback kết thúc: Sách đã được ghi nhận vào kho. Trạng thái Concluded.</span>`);
+            } catch(e) {
+                log(`<span style="color: #ef4444;">Error: ${e.message}</span>`);
+            }
+        });
+    </script>
+</body>
+</html>

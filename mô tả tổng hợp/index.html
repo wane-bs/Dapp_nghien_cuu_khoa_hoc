@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ đồ Hệ thống VinaLib-Vault v3.0</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #2980b9;
+            margin-top: 40px;
+            border-left: 5px solid #3498db;
+            padding-left: 10px;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .mermaid {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .description {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Sơ đồ Hệ thống VinaLib-Vault v3.0</h1>
+    <p style="text-align: center;">Tài liệu visual hóa cấu trúc hệ thống mô phỏng (Mock Architecture) cho VinaLib-Vault
+        (Cập nhật 2026-02-19).</p>
+
+    <!-- 1. Architecture -->
+    <div class="diagram-container">
+        <h2>1. Kiến trúc tổng quan (Architecture Overview)</h2>
+        <p class="description">Mô hình chiến lược lai (Hybrid Strategy) với Blockchain Core làm trung tâm.</p>
+        <div class="mermaid">
+            graph LR
+            %% Define Styles
+            classDef frontend fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+            classDef backend fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+            classDef blockchain fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+            classDef external fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5;
+
+            subgraph Web_Interaction ["Lớp Web3 DApp"]
+            direction TB
+            Frontend["Frontend React SDK<br />Web3Provider / ethers.js"]:::frontend
+            end
+
+            subgraph Blockchain_Core ["Lớp Blockchain Cốt Lõi (Hardhat Local)"]
+            direction TB
+            Contracts["Smart Contracts (EVM)<br />(VinaLibVault, BookAsset)"]:::blockchain
+            IPFS["IPFS Simulator<br />Hình ảnh & Metadata"]:::blockchain
+            end
+
+            subgraph Third_Party ["Dịch Vụ Bên Thứ 3"]
+            direction TB
+            Mocks["Mock API<br />Tạm ngưng / Legacy"]:::external
+            end
+
+            %% Flows
+            Frontend -- "Giao dịch MetaMask (Write) / RPC (Read)" --> Contracts
+            Frontend -- "Lưu/Đọc ảnh bằng CIDv1" --> IPFS
+        </div>
+    </div>
+
+    <!-- 1.1 Các Bên Tham Gia -->
+    <div class="diagram-container">
+        <h2 id="section-1-1" style="color: #2980b9; margin-top: 30px;">1.1 Các Bên Tham Gia Hệ Thống (System
+            Participants)</h2>
+        <p class="description">Sơ đồ tương tác giữa các thực thể quy trình và hạ tầng kỹ thuật trong luồng thuê sách.
+        </p>
+        <div class="mermaid">
+            graph TD
+            classDef actor fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+            classDef admin fill:#ffebee,stroke:#c62828,stroke-width:2px;
+            classDef onchain fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+            classDef offchain fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+            classDef auto fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5;
+            classDef physical fill:#eceff1,stroke:#607d8b,stroke-width:2px;
+
+            subgraph "Thực Thể Người Dùng"
+            Renter(["🧍 Khách Hàng (Renter)<br>Tương tác qua Web3 UI"]):::actor
+            Admin(["👑 Quản Trị Viên (Admin)<br>Sở hữu thư viện & sách"]):::admin
+            end
+
+            subgraph "Hạ Tầng Phi Tập Trung (Decentralized Core)"
+            BC[("⛓️ Mạng Blockchain<br>(EVM L1/L2)<br>Tính toán & Sổ cái bất biến")]:::onchain
+            IPFS[("📦 Mạng IPFS<br>Lưu trữ phi tập trung lớn")]:::onchain
+            SC["📜 Smart Contracts<br>(NFT Sách, Hợp đồng thuê)"]:::onchain
+            BC --- SC
+            end
+
+            subgraph "Hệ Thống Tự Động & Hỗ Trợ (Hybrid Layer)"
+            Backend["🖥️ Backend (Worker)<br>Đồng bộ dữ liệu Off-chain"]:::offchain
+            Chainlink["⚙️ Chainlink Automation<br>Oracles tự động hóa"]:::auto
+            end
+
+            subgraph "Thực Thể Vật Lý"
+            IoT["🔒 Thiết Bị IoT<br>(Smart Lock / RFID)"]:::physical
+            Book["📖 Sách Vật Lý"]:::physical
+            end
+
+            %% Flows
+            Renter -- "1. Tự ký & Khởi tạo thuê (createRental)" --> SC
+            Admin -- "2. Duyệt sách (verifyForListing)<br>Xác nhận trả (confirmReturn)" --> SC
+
+            SC -- "Lưu trữ bằng chứng (CID)" --> IPFS
+            Renter -- "Đọc nội dung/bìa sách" --> IPFS
+
+            Backend -- "Lắng nghe Sự kiện On-chain" --> SC
+            Backend -- "Phản hồi API Giao diện nhanh" --> Renter
+
+            Chainlink -- "3. Giám sát quá hạn (checkUpkeep)<br>Kích hoạt thu hồi (performUpkeep)" --> SC
+
+            IoT -. "4. Mở khóa khi Hợp đồng Active" .-> SC
+            Backend -. "Xử lý tín hiệu Mở khóa" .-> IoT
+            IoT -- "Bảo vệ" --> Book
+        </div>
+    </div>
+
+    <!-- 2. Smart Contracts -->
+    <div class="diagram-container">
+        <h2>2. Hợp Đồng Thông Minh (Smart Contracts)</h2>
+        <p class="description">Được đồng bộ hóa chuẩn xác theo kết quả phân tích hệ thống (Không có dòng tiền chia sẻ
+            On-chain, SBT pre-mint từ Backend).</p>
+        <div class="mermaid">
+            graph TB
+            %% Định nghĩa Style
+            classDef external fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5;
+            classDef func fill:#ffe0b2,stroke:#ef6c00,stroke-width:1px;
+            classDef state fill:#ffcc80,stroke:#e65100,stroke-width:1px;
+
+            subgraph Externals["Các Đối Tượng Ngoài Hợp Đồng"]
+            User["Người dùng (Renter/Lender)"]
+            Admin["Quản trị/Hệ thống"]
+            Backend["Backend (Worker)"]
+            Chainlink["Chainlink Automation"]
+            end
+
+            subgraph VinaLibVault["Hợp Đồng: VinaLibVault.sol"]
+            Vault_create["createRental"]
+            Vault_reqRet["requestReturn"]
+            Vault_confRet["confirmReturn"]
+            Vault_cancel["cancelListing"]
+            Vault_claim["claimCollateral"]
+            Vault_check["checkUpkeep"]
+            Vault_perform["performUpkeep"]
+            Vault_state[("EvidencePack State")]
+            end
+
+            subgraph BookAsset["Hợp Đồng: BookAsset.sol"]
+            BA_mint["safeMint"]
+            BA_verify["verifyForListing"]
+            BA_preRent["verifyPreRent"]
+            BA_verifyRet["verifyReturn"]
+            BA_setUser["setUser (ERC4907)"]
+            BA_state[("Book Status & NFT")]
+            end
+
+            subgraph RentalAgreementSBT["Hợp Đồng: RentalAgreementSBT.sol"]
+            SBT_mint["safeMint"]
+            SBT_update["_update (Chặn Transfer)"]
+            SBT_state[("SBT Record")]
+            end
+
+            User -->|1. Tạo NFT Sách| BA_mint
+            Admin -->|2. Cấp phép| BA_verify
+            User -->|3. Khởi tạo thuê| Vault_create
+            User -->|4. Báo cáo trả sách| Vault_reqRet
+            Admin -->|5. Xác nhận trả/Hủy vé| Vault_confRet
+            Admin -->|Xử lý vi phạm| Vault_claim
+            Admin -->|Hủy khi chưa thuê| Vault_cancel
+            Backend -->|Pre-mint SBT| SBT_mint
+            Chainlink -->|Giám sát thời hạn| Vault_check
+            Chainlink -->|Tự động kết thúc| Vault_perform
+
+            BA_mint -.-> BA_state
+            BA_verify -.-> BA_state
+            BA_preRent -.-> BA_state
+            BA_verifyRet -.-> BA_state
+            BA_setUser -.-> BA_state
+
+            Vault_create -.-> Vault_state
+            Vault_reqRet -.-> Vault_state
+            Vault_confRet -.-> Vault_state
+            Vault_cancel -.-> Vault_state
+            Vault_claim -.-> Vault_state
+
+            SBT_mint -.-> SBT_update
+            SBT_update -.-> SBT_state
+
+            Vault_create -->|Cấp quyền| BA_setUser
+            Vault_create -.->|Lưu mapping ID| SBT_state
+
+            Vault_confRet -->|Thu hồi quyền| BA_setUser
+            Vault_confRet -->|Cập nhật sách| BA_verifyRet
+
+            Vault_cancel -->|Thu hồi quyền| BA_setUser
+            Vault_cancel -->|Cập nhật sách| BA_verifyRet
+
+            Vault_claim -->|Thu hồi quyền| BA_setUser
+            Vault_claim -->|Đánh dấu hư hỏng| BA_verifyRet
+
+            Vault_perform -->|Kích hoạt| Vault_claim
+        </div>
+
+        <div
+            style="margin-top: 20px; padding: 15px; background-color: #e8f4f8; border-left: 4px solid #2980b9; border-radius: 4px;">
+            <strong>📝 Ghi chú về các thành phần được lược bỏ/đơn giản hóa:</strong>
+            <ul style="margin-top: 10px; margin-bottom: 0; padding-left: 20px;">
+                <li style="margin-bottom: 8px;"><strong>Hợp đồng <code>SuChinToken</code> (ERC-20):</strong> Đã được
+                    loại bỏ khỏi sơ đồ. Phân tích logic cho thấy <code>VinaLibVault</code> cốt lõi hiện tại không trực
+                    tiếp xử lý phân bổ dòng tiền On-chain (Native/ERC-20) trong hàm tạo hợp đồng mà được xử lý thanh
+                    toán Off-chain qua Webhook.</li>
+                <li style="margin-bottom: 8px;"><strong>Quy trình đúc (Mint) Bằng chứng thuê SBT:</strong>
+                    <code>VinaLibVault</code> không tự gọi lệnh đúc SBT mới khi tạo phiên thuê. Thực tế, SBT được đúc
+                    sẵn (pre-mint) bằng Backend, và Vault chỉ thực hiện liên kết (mapping) tới SBT ID đó. Sơ đồ đã lược
+                    bỏ luồng "Vault gọi Mint SBT" để tránh sai lệch.
+                </li>
+                <li><strong>Các hàm quản trị và vòng đời (Admin/Lifecycle):</strong> Các hàm như <code>pause()</code>,
+                    <code>unpause()</code>, <code>setConfig()</code>, <code>setContracts()</code> được ẩn khỏi biểu đồ
+                    nhằm tập trung hoàn toàn vào luồng nghiệp vụ thuê sách cốt lõi (Core Rental Flow).
+                </li>
+            </ul>
+        </div>
+
+        <h3 style="margin-top: 30px; border-bottom: 2px solid #3498db; display: inline-block;">2.1. Luồng Quản Trị &
+            Vòng Đời Hợp Đồng (Admin & Lifecycle Flow)</h3>
+        <p class="description">Sơ đồ phụ mô tả các đặc quyền và thao tác quản trị hệ thống, thiết lập cấu hình và tạm
+            dừng hoạt động.</p>
+        <div class="mermaid">
+            graph TB
+            classDef external fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5;
+            classDef adminFunc fill:#ffcdd2,stroke:#c62828,stroke-width:1px;
+            classDef state fill:#ffcc80,stroke:#e65100,stroke-width:1px;
+
+            subgraph Externals["Các Đối Tượng Ngoài Hợp Đồng"]
+            Admin["Quản trị/Hệ thống"]
+            end
+
+            subgraph VinaLibVault["Hợp Đồng: VinaLibVault.sol"]
+            Vault_setConfig["setConfig"]
+            Vault_setContracts["setContracts"]
+            Vault_transferOwnership["transferOwnership"]
+            Vault_state["System Configuration"]
+            end
+
+            subgraph BookAsset["Hợp Đồng: BookAsset.sol"]
+            BA_setRentalContract["setRentalContract"]
+            BA_pause["pause"]
+            BA_unpause["unpause"]
+            BA_transferOwnership["transferOwnership"]
+            BA_state["Book Asset Settings & State"]
+            end
+
+            subgraph RentalAgreementSBT["Hợp Đồng: RentalAgreementSBT.sol"]
+            SBT_setRentalContract["setRentalContract"]
+            SBT_transferOwnership["transferOwnership"]
+            SBT_state["SBT Settings"]
+            end
+
+            %% Tương tác Quản trị
+            Admin -->|Cấu hình Chainlink/Vault| Vault_setConfig
+            Admin -->|Cập nhật SBT/BookAsset| Vault_setContracts
+            Admin -->|Chuyển giao quyền chủ| Vault_transferOwnership
+
+            Admin -->|Liên kết Vault| BA_setRentalContract
+            Admin -->|Ngưng hoạt động| BA_pause
+            Admin -->|Khôi phục hoạt động| BA_unpause
+            Admin -->|Chuyển giao quyền chủ| BA_transferOwnership
+
+            Admin -->|Liên kết Vault| SBT_setRentalContract
+            Admin -->|Chuyển giao quyền chủ| SBT_transferOwnership
+
+            %% Tác động nội bộ
+            Vault_setConfig -.-> Vault_state
+            Vault_setContracts -.-> Vault_state
+            Vault_transferOwnership -.-> Vault_state
+
+            BA_setRentalContract -.-> BA_state
+            BA_pause -.-> BA_state
+            BA_unpause -.-> BA_state
+            BA_transferOwnership -.-> BA_state
+
+            SBT_setRentalContract -.-> SBT_state
+            SBT_transferOwnership -.-> SBT_state
+        </div>
+    </div>
+
+    <!-- 3. IPFS Architecture and Data Flow -->
+    <div class="diagram-container">
+        <h2>3. IPFS - Kiến Trúc và Luồng Dữ Liệu</h2>
+        <p class="description">Tổng quan về hệ thống lưu trữ phân tán IPFS và cách tích hợp vào VinaLib.</p>
+
+        <h3 style="color: #2980b9; margin-top: 20px;">3.1. Mạng lưới IPFS (IPFS Network Topology)</h3>
+        <div class="mermaid">
+            graph TB
+            subgraph "Mạng Lưới IPFS"
+            Node1["Node IPFS 1<br />Châu Á"]
+            Node2["Node IPFS 2<br />Châu Âu"]
+            Node3["Node IPFS 3<br />Châu Mỹ"]
+            Node4["Node IPFS 4<br />Châu Phi"]
+
+            DHT[("Bảng Băm<br />Phân Tán")]
+            end
+
+            User[Người Dùng Cuối] -->|Truy vấn CID| Node1
+            Node1 <-->|Khám Phá Peer| DHT
+                DHT -->|Trả Về Providers| Node1
+
+                Node1 <-.->|Kết Nối P2P| Node2
+                    Node1 <-.->|Kết Nối P2P| Node3
+                        Node2 <-.->|Kết Nối P2P| Node4
+                            Node3 <-.->|Kết Nối P2P| Node4
+
+                                Node2 -->|Truyền Block| Node1
+                                Node3 -->|Truyền Block| Node1
+
+                                Node1 -->|Dữ Liệu Đã Ghép| User
+
+                                classDef nodeStyle fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+                                classDef userStyle fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+                                classDef dhtStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
+
+                                class Node1,Node2,Node3,Node4 nodeStyle
+                                class User userStyle
+                                class DHT dhtStyle
+        </div>
+
+        <h3 style="color: #2980b9; margin-top: 30px;">3.2. Quy Trình Truy Xuất Dữ Liệu (Content Routing Flow)</h3>
+        <div class="mermaid">
+            sequenceDiagram
+            autonumber
+            participant User as Node IPFS Của Người Dùng
+            participant DHT as Bảng Băm Phân Tán (DHT)
+            participant P1 as Peer Cung Cấp 1
+            participant P2 as Peer Cung Cấp 2
+            participant P3 as Peer Cung Cấp 3
+
+            Note over User: Người dùng yêu cầu CID:<br />bafybei...
+
+            User->>DHT: FIND_PROVIDERS(CID)
+            DHT->>DHT: Kademlia Lookup<br />(Khoảng cách XOR)
+
+            DHT-->>User: Danh sách Provider:<br />P1, P2, P3
+
+            par Lấy Block Song Song
+            User->>P1: WANT_BLOCK(block_0)
+            User->>P2: WANT_BLOCK(block_1)
+            User->>P3: WANT_BLOCK(block_2)
+            end
+
+            par Phản Hồi
+            P1-->>User: BLOCK_DATA(block_0)
+            P2-->>User: BLOCK_DATA(block_1)
+            P3-->>User: BLOCK_DATA(block_2)
+            end
+
+            User->>User: Xác Thực Hash<br />(SHA-256)
+            User->>User: Lắp Ráp lại DAG
+
+            Note over User: Nội Dung Sẵn Sàng!
+        </div>
+
+        <h3 style="color: #2980b9; margin-top: 30px;">3.3. IPFS Gateway Architecture</h3>
+        <div class="mermaid">
+            graph LR
+            subgraph "Phía Client"
+            Browser[Trình Duyệt Web]
+            end
+
+            subgraph "Gateway (Bộ chuyển đổi HTTP ↔ IPFS)"
+            GW[Máy Chủ Gateway IPFS]
+            Node[Node IPFS Nhúng]
+            Cache[Lớp Cache HTTP]
+            end
+
+            subgraph "Mạng Lưới IPFS"
+            P2P["Mạng P2P<br />Peers Toàn Cầu"]
+            end
+
+            Browser -->|"HTTP GET<br />https://gateway/ipfs/CID"| GW
+            GW -->|1. Kiểm Tra Cache| Cache
+            Cache -.->|Không Thấy Cache| Node
+            Node -->|2. Lấy qua Bitswap| P2P
+            P2P -->|3. Trả Về Blocks| Node
+            Node -->|4. Lắp Ráp| GW
+            GW -->|"5. Phản Hồi HTTP<br />+ Cache Headers"| Browser
+            Cache -.->|Tìm Thấy Cache| GW
+
+            classDef gateway fill:#fff3e0,stroke:#e65100,stroke-width:2px
+            classDef ipfs fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+            classDef client fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+
+            class GW,Node,Cache gateway
+            class P2P ipfs
+            class Browser client
+        </div>
+
+        <h3 style="color: #2980b9; margin-top: 30px;">3.4. Tích hợp IPFS vào VinaLib (IPFS Integration)</h3>
+        <p class="description">Hiện tại sử dụng IPFS Simulator (Local) để mô phỏng hành vi lưu trữ phân tán.</p>
+        <div class="mermaid">
+            graph TB
+            subgraph "Frontend (React/Next.js)"
+            UI["Giao diện Người dùng"]
+            UploadBtn["Nút Tải ảnh Bìa"]
+            DisplayImg["Component Hiển thị Ảnh"]
+            end
+
+            subgraph "Backend (Node.js)"
+            API["Express Server"]
+            IPFSMod["Module IPFS<br />(Simulator Adapter)"]
+            LocalFS["Hệ Thống File Cục Bộ<br />/IPFS/storage"]
+            end
+
+            subgraph "Blockchain (Avalanche)"
+            Contract["Smart Contract:<br />BookAsset.sol"]
+            Storage["Lưu Trữ:<br />mapping bookId to CID"]
+            end
+
+            UploadBtn -->|1. Chọn Ảnh| API
+            API -->|2. Luồng Tải Lên| IPFSMod
+            IPFSMod -->|3. Băm SHA-256| IPFSMod
+            IPFSMod -->|4. Lưu File| LocalFS
+            IPFSMod -->|5. Trả về CID| API
+            API -->|6. Lưu CID| Contract
+            Contract -->|7. Phát Sự Kiện| Storage
+
+            UI -->|8. Lấy Dữ Liệu Sách| Contract
+            Contract -->|9. Trả về CID| UI
+            DisplayImg -->|10. Yêu cầu /api/ipfs/:cid| API
+            API -->|11. Đọc File| LocalFS
+            API -->|12. Trả về Luồng Ảnh| DisplayImg
+
+            classDef frontend fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+            classDef backend fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+            classDef blockchain fill:#fff3e0,stroke:#e65100,stroke-width:2px
+            classDef storage fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+
+            class UI,UploadBtn,DisplayImg frontend
+            class API,IPFSMod backend
+            class Contract,Storage blockchain
+            class LocalFS storage
+        </div>
+
+        <h3 style="color: #2980b9; margin-top: 30px;">3.5. Data Retrieval và Rendering Pipeline</h3>
+        <div class="mermaid">
+            sequenceDiagram
+            autonumber
+            participant User as Trình Duyệt Người Dùng
+            participant GW as Gateway IPFS
+            participant IPFS as Mạng Lưới IPFS
+            participant Render as Bộ Render Trình Duyệt
+
+            User->>GW: GET /ipfs/bafybei.../video.mp4
+
+            GW->>IPFS: Truy vấn Providers qua DHT
+            IPFS-->>GW: Danh sách Provider
+
+            GW->>IPFS: Lấy Block Gốc
+            IPFS-->>GW: Block Gốc (Metadata)
+
+            Note over GW: Phân tách cấu trúc DAG:<br />- Tổng kích thước<br />- Danh sách Chunk
+
+            par Tải Chunk Song Song
+            GW->>IPFS: Lấy Chunk 1
+            GW->>IPFS: Lấy Chunk 2
+            GW->>IPFS: Lấy Chunk 3
+            end
+
+            par Phản Hồi Chunk Song Song
+            IPFS-->>GW: Dữ liệu Chunk 1
+            IPFS-->>GW: Dữ liệu Chunk 2
+            IPFS-->>GW: Dữ liệu Chunk 3
+            end
+
+            loop Cho Mỗi Chunk
+            GW->>GW: Xác thực Hash<br />SHA-256(chunk) == expected_hash
+            end
+
+            GW->>GW: Lắp ráp Chunk thành File
+
+            GW->>User: HTTP 200 OK<br />Content-Type: video/mp4<br />Content-Length: 10485760<br />[Stream Data]
+
+            User->>Render: Giải mã Video Stream
+            Render->>Render: Giải mã H.264/H.265
+            Render-->>User: Hiển thị Video
+        </div>
+    </div>
+
+    <!-- 4. Backend -->
+    <div class="diagram-container">
+        <h2>4. Định vị vai trò cho backend</h2>
+        <p class="description">Backend đã chuyển từ trung tâm điều phối logic sang vai trò hỗ trợ Off-chain, nhường vị
+            trí cốt lõi cho Smart Contracts.</p>
+        <div class="mermaid">
+            graph TD
+            classDef core fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+            classDef current fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+            classDef future fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+
+            subgraph The_Core ["Nguồn Chân Lý Duy Nhất (Single Source of Truth)"]
+            SC["Smart Contracts (.sol)<br />Chứa toàn bộ Business Flows & State Machine"]:::core
+            end
+
+            subgraph Current_Role ["Trạng thái Hiện Tại (Hỗ trợ Off-chain)"]
+            UI["Phục vụ UI (Bootstrapper)<br />Chạy & phân phối React DApp"]:::current
+            Adapter["Adapter & Middleware<br />Giao tiếp Mock API, eContract, IoT"]:::current
+            OffChain["Xử lý Off-chain<br />Policy Engine, Contract Generator, IPFS Sim"]:::current
+            end
+
+            subgraph Future_Role ["Định hướng Tương Lai (True DApp)"]
+            Thin["Backend mỏng dần<br />Frontend tương tác trực tiếp RPC/Ethers.js"]:::future
+            Microservices["Microservices/Workers<br />Lắng nghe On-chain Events (vd: gửi Email)"]:::future
+            Decentralized["Phi tập trung lưu trữ<br />IPFS và On-chain thay thế DB tập trung"]:::future
+            end
+
+            The_Core -. "Backend thu hẹp lại xung quanh lõi" .-> Current_Role
+            Current_Role -. "Tiến tới phân tán hoàn toàn" .-> Future_Role
+        </div>
+    </div>
+
+    <!-- 5. Frontend -->
+    <div class="diagram-container">
+        <h2>5. Cấu Trúc Frontend (FSD)</h2>
+        <p class="description">Tuân thủ Feature-Sliced Design. Đã tích hợp module Explorer.</p>
+        <div class="mermaid">
+            graph TD
+            classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+            classDef page fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+            classDef shared fill:#e0f2f1,stroke:#00695c,stroke-width:2px;
+            classDef empty fill:#fafafa,stroke:#bdbdbd,stroke-width:1px,stroke-dasharray: 5 5;
+
+            subgraph App_Layer [Tầng Ứng Dụng - App Layer]
+            App["App.tsx"]:::app
+            Providers[Providers]:::app
+            Styles[Styles Toàn Cục]:::app
+            end
+
+            subgraph Pages_Layer [Tầng Trang - Pages Layer]
+            Login[LoginPage]:::page
+            Register[RegisterPage]:::page
+            Home[HomePage]:::page
+            Explorer["Các Trang Explorer"]:::page
+            Account[AccountPage]:::page
+            Wallet[WalletPage]:::page
+            RentOut[RentOutPage]:::page
+            BookDetail[BookDetail]:::page
+            Settings[Settings]:::page
+            Owner[OwnerDashboard]:::page
+            Lender[LenderDashboard]:::page
+            ContractPreview[ContractPreviewPage]:::page
+            end
+
+            subgraph Shared_Layer [Tầng Dùng Chung - Shared Layer]
+            UI["UI Kit - Button, Input"]:::shared
+            API["Axios Config"]:::shared
+            Lib["Utils"]:::shared
+            end
+
+            subgraph Empty_Layers_Phase1 [Các Tầng Chờ - Pending Phase 2]
+            Widgets["Widgets (.gitkeep)"]:::empty
+            Features["Features (.gitkeep)"]:::empty
+            Entities["Entities (.gitkeep)"]:::empty
+            end
+
+            App -- "Điều hướng đến" --> Login
+            App -- "Điều hướng đến" --> Home
+            App -- "Điều hướng đến" --> Explorer
+            App -- "Điều hướng đến" --> Owner
+
+            Login -- "Nhúng thành phần" --> UI
+            Home -- "Nhúng thành phần" --> UI
+            Explorer -- "Nhúng thành phần" --> UI
+            Owner -- "Nhúng thành phần" --> UI
+        </div>
+    </div>
+
+    <!-- 6. Workflow -->
+    <div class="diagram-container">
+        <h2>6. Data Flow - Quy trình thuê sách (Rental Workflow)</h2>
+        <p class="description">Minh họa quy trình thuê, xác thực 2 chiều (User Request &lt;-&gt; Admin Confirm) và thanh
+            toán
+            Off-chain.</p>
+        <div class="mermaid">
+            sequenceDiagram
+            autonumber
+
+            box "Người Dùng (User Zone)" #e3f2fd
+            actor User as Renter (Người thuê)
+            participant FE as Frontend UI
+            end
+
+            box "Hệ Thống Xử Lý (System Zone)" #e8f5e9
+            participant BE as Backend API
+            participant SC as Smart Contracts
+            end
+
+            box "Dịch Vụ & Quản Trị (External)" #fff3e0
+            participant Legal as Mock Legal
+            actor Admin as Administrator
+            end
+
+            %% Giai đoạn 1
+            rect rgb(240, 248, 255)
+            note right of User: Bước 1: Thiết lập & Đăng sách (Setup & Listing)
+            User->>FE: Tải lên Thông Tin Sách
+            FE->>BE: POST /api/books (Chờ xử lý)
+            BE->>BE: Lưu vào Bộ Nhớ
+            Admin->>FE: Duyệt Đăng Tin (Dashboard Chủ Sách)
+            alt Xác Minh (Chấp thuận)
+            FE->>BE: POST verify-listing
+            BE->>SC: BookAsset.verifyForListing()
+            SC-->>BE: Sự kiện: BookVerified
+            BE-->>FE: Trạng thái -> VERIFIED
+            else Từ Chối (Hủy)
+            FE->>BE: POST reject-listing (Cần lý do)
+            BE->>BE: Update Trạng thái -> REJECTED
+            BE-->>FE: Thông báo cho Người Cho Thuê
+            end
+            end
+
+            %% Giai đoạn 2
+            rect rgb(255, 248, 240)
+            note right of User: Bước 2: Đặt thuê & Ký kết (Booking & Contracts)
+            User->>FE: Tạo Yêu cầu Thuê
+            FE->>BE: POST /api/booking
+            BE->>Legal: Tạo Xem Trước Hợp Đồng
+            Legal-->>BE: Trả về previewId, termsHash
+            User->>FE: Xem lại Hợp đồng (Xem trước)
+            User->>FE: Chấp thuận & Ký (Nhấn nút Ký)
+            FE->>BE: POST /api/contracts/:id/accept
+
+            BE->>BE: Kiểm tra Policy Engine (TrustScore)
+            alt AUTO APPROVED
+            BE-->>FE: Trạng thái -> SIGNED_UNPAID
+            else REVIEW NEEDED
+            BE-->>FE: Trạng thái -> SIGNED_PENDING_APPROVAL
+            Admin->>FE: Duyệt Yêu Cầu Thuê (Thủ công)
+            FE->>BE: Logic Duyệt
+            BE-->>FE: Trạng thái -> SIGNED_UNPAID
+            end
+            end
+
+            %% Giai đoạn 3
+            rect rgb(240, 255, 240)
+            note right of User: Bước 3: Thanh toán & Đúc Token (Payment & Minting)
+            User->>FE: Thanh toán qua Ví/Ngân hàng
+            FE->>BE: Webhook Thanh toán/Tín hiệu
+            BE->>SC: VinaLibVault.createRental(..., existingSbtId)
+            activate SC
+            SC->>SC: Kiểm tra Trạng thái Xác minh
+            SC->>SC: Ghi nhận SBT ID (đã đúc)
+            SC->>SC: BookAsset.setUser(User)
+            SC-->>BE: Sự kiện: RentalCreated
+            deactivate SC
+            BE-->>FE: Thuê Đang Hoạt Động (Mở khóa thiết bị có sẵn)
+            end
+
+            %% Giai đoạn 4
+            rect rgb(255, 240, 245)
+            note right of User: Bước 4: Quy trình Trả sách (Return Process)
+            User->>FE: Yêu cầu Trả
+            FE->>BE: Gửi Yêu Cầu Trả
+            BE->>SC: VinaLibVault.requestReturn()
+
+            Admin->>FE: Xác nhận Trả Vật lý
+            FE->>BE: Xác nhận Hành động Trả
+            BE->>SC: VinaLibVault.confirmReturn()
+            activate SC
+            SC->>SC: Thu hồi Quyền Người Dùng
+            SC->>SC: Đánh dấu EvidencePack là Đã Kết Thúc
+            deactivate SC
+            BE-->>FE: Trạng thái -> COMPLETED
+            end
+        </div>
+    </div>
+
+    <!-- 7. Interaction -->
+    <div class="diagram-container">
+        <h2>7. Interaction Flows (Actors)</h2>
+        <p class="description">Quyền hạn của các tác nhân trong hệ thống (RBAC).</p>
+        <div class="mermaid">
+            graph LR
+            %% Styles
+            classDef actor fill:#f9f9f9,stroke:#333,stroke-width:2px;
+            classDef action fill:#e1f5fe,stroke:#0288d1,stroke-width:1px;
+            classDef adminAction fill:#ffebee,stroke:#c62828,stroke-width:1px;
+
+            subgraph Renter_Zone [Khu vực Người Thuê - Renter]
+            direction TB
+            Renter((Renter)):::actor
+            Browse["Xem sách"]:::action
+            Booking["Đặt thuê"]:::action
+            Sign["Ký Hợp Đồng"]:::action
+            Pay["Thanh toán & Mở khóa"]:::action
+            Return["Yêu cầu Trả"]:::action
+
+            Renter -- "User Role" --> Browse
+            Renter -- "User Role" --> Booking
+            Renter -- "User Role" --> Sign
+            Renter -- "User Role" --> Pay
+            Renter -- "User Role" --> Return
+            end
+
+            subgraph Lender_Zone [Khu vực Chủ Sách - Lender]
+            direction TB
+            Lender((Lender)):::actor
+            Upload["Đăng sách lên"]:::action
+            ViewOwn["Xem sách đã đăng"]:::action
+
+            Lender -- "Lender Role" --> Upload
+            Lender -- "Lender Role" --> ViewOwn
+            end
+
+            subgraph Admin_Zone [Khu vực Quản Trị - Admin]
+            direction TB
+            Admin((Admin)):::actor
+            Verify["Duyệt sách lên sàn"]:::adminAction
+            Approve["Duyệt đơn thuê (Thủ công)"]:::adminAction
+            Confirm["Xác nhận Trả sách"]:::adminAction
+            Monitor["Giám sát Hệ thống"]:::adminAction
+
+            Admin -- "Admin Role" --> Verify
+            Admin -- "Admin Role" --> Approve
+            Admin -- "Admin Role" --> Confirm
+            Admin -- "Admin Role" --> Monitor
+            end
+
+            %% Interactions across zones
+            Booking -. "Cần duyệt nếu Rủi ro Cao" .-> Approve
+            Return -. "Cần xác nhận Vật lý" .-> Confirm
+        </div>
+    </div>
+
+    <!-- 8. Mocks -->
+    <div class="diagram-container">
+        <h2>8. Dịch Vụ Giả Lập & Cấu Trúc IPFS</h2>
+        <p class="description">Các dịch vụ giả lập hỗ trợ hệ thống (Chạy trên Port 4000).</p>
+        <div class="mermaid">
+            graph TD
+            classDef mock fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+            classDef ipfs fill:#e0f7fa,stroke:#006064,stroke-width:2px;
+
+            subgraph Mocks [Dịch Vụ Giả Lập - Mock Services :4000]
+            MockApp["mock-server/index.js"]:::mock
+            Legal["Dịch Vụ Pháp Lý<br />FPT eContract"]:::mock
+            IoT["Dịch Vụ IoT<br />Tuya Smart Lock"]:::mock
+            Bank["Dịch Vụ Ngân Hàng<br />Casso Webhook"]:::mock
+            end
+
+            subgraph IPFS [Giả Lập IPFS - Trình Mô Phỏng IPFS]
+            Images["images/*.jpg"]:::ipfs
+            Meta["metadata/*.json"]:::ipfs
+            Route["/api/ipfs/:cid<br />(Chế độ Proxy)"]:::ipfs
+            end
+
+            MockApp -- "Chạy" --> Legal
+            MockApp -- "Chạy" --> IoT
+            MockApp -- "Chạy" --> Bank
+
+            Legal -- cung cấp --> TermsHash
+            IoT -- cung cấp --> Ticket/OTP
+            Bank -- cung cấp --> PaymentWebhook
+
+            Images -. "Được băm thành" .-> CIDv1
+            Meta -. "Được băm thành" .-> CIDv1
+        </div>
+    </div>
+
+    <!-- 9. Functional Mapping -->
+    <div class="diagram-container">
+        <h2>9. Sơ đồ Ánh xạ Chức năng: Thuê Sách (Functional Mapping: Rent Book)</h2>
+        <p class="description">Bản đồ ánh xạ chi tiết từ thành phần Giao diện (Frontend) đến Logic xử lý (Backend) và
+            Hàm Blockchain (Smart Contracts) cho tính năng quan trọng nhất: Thuê Sách.</p>
+        <div class="mermaid">
+            graph LR
+            %% Styles
+            classDef ui fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+            classDef sc fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+            classDef middleware fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+
+            subgraph Frontend_Layer [Tầng Giao Diện - React DApp]
+            direction TB
+            UI_Page["BookDetailPage.tsx"]:::ui
+            UI_Btn["Nút Thuê MetaMask"]:::ui
+            UI_Page -- "Chứa" --> UI_Btn
+            end
+
+            subgraph Provider_Layer [Tầng Middleware - SDK]
+            direction TB
+            EthersJS["ContractService.ts<br />(Ký Transaction bằng Wallet)"]:::middleware
+            end
+
+            subgraph Blockchain_Layer [Tầng Hợp Đồng - Smart Contracts]
+            direction TB
+            SC_Vault["VinaLibVault.sol"]:::sc
+            SC_Func["createRental()"]:::sc
+            SC_Asset["BookAsset.sol<br />setUser"]:::sc
+
+            SC_Vault -- "Chứa hàm" --> SC_Func
+            SC_Func -- "Gọi sang" --> SC_Asset
+            end
+
+            %% Mappings (Arrows)
+            UI_Btn -- "1. Yêu cầu Confirm" --> EthersJS
+            EthersJS -- "2. Phát TX kèm msg.value" --> SC_Func
+        </div>
+    </div>
+
+    <!-- 10. Policy Engine Auto-Accept -->
+    <div class="diagram-container">
+        <h2>10. Policy Engine Auto-Accept (Phase 2) - Cơ chế Tự Động Duyệt</h2>
+        <p class="description">Hệ thống đánh giá rủi ro dựa trên 3 yếu tố: Tier sách (rủi ro tài sản), TrustScore người
+            thuê (rủi ro con người), và Deposit ratio (tỷ lệ cọc). Kết quả quyết định sẽ là AUTO (tự động duyệt),
+            REVIEW (xem xét ngắn hạn), MANUAL (duyệt thủ công), hoặc REJECT (từ chối).</p>
+
+        <h3 style="color: #2980b9; margin-top: 20px;">10.1. Quy trình Quyết định (Decision Flow)</h3>
+        <div class="mermaid">
+            flowchart TD
+            Start(["Người thuê ký hợp đồng<br />Đã Ký Điều Khoản"]) --> Gate0{"Kiểm tra sách<br />Sách Sẵn Sàng?"}
+
+            Gate0 -->|"status ≠ VERIFIED<br />hoặc isRented = true"| Reject1["REJECT<br />reasonCode:
+            BOOK_NOT_AVAILABLE"]
+            Gate0 -->|"✓ Sách sẵn sàng"| CalcTrust["Tính TrustScore<br />base=50
+            +10*min(thuê_xong,5)<br />-20*tranh_chấp -10*trễ<br />giới hạn 0-100"]
+
+            CalcTrust --> GetInputs["Thu thập inputs:<br />• tier = book.riskTier (Mặc định: C)<br />• band =
+            HIGH/MED/LOW<br />• depositRatio = deposit/value"]
+
+            GetInputs --> CheckTier{"Tier nào?"}
+
+            %% Tier C Branch
+            CheckTier -->|"Tier C<br />(Low Risk)"| TierC{"TrustBand?"}
+            TierC -->|"LOW & Ratio &lt; 50%"| ReviewC["REVIEW<br />reasonCode:
+            TIER_C_LOW_TRUST_NEED_REVIEW<br />deadline: +30m"]
+            TierC -->|"Else"| AutoC["AUTO<br />reasonCode: TIER_C_OK<br />deadline: +60m"]
+
+            %% Tier B Branch
+            CheckTier -->|"Tier B<br />(Medium Risk)"| TierB{"TrustBand?"}
+            TierB -->|"HIGH"| AutoB1["AUTO<br />reasonCode: TIER_B_HIGH_TRUST"]
+            TierB -->|"MED"| DepositB1{"Ratio?"}
+            DepositB1 -->|"≥ 50%"| AutoB2["AUTO<br />reasonCode: TIER_B_MED_TRUST_DEPOSIT_OK"]
+            DepositB1 -->|"&lt; 50%"| ReviewB["REVIEW<br />reasonCode: TIER_B_MED_TRUST_REVIEW"]
+            TierB -->|"LOW"| DepositB2{"Ratio?"}
+            DepositB2 -->|"≥ 70%"| ReviewB2["REVIEW<br />reasonCode: TIER_B_LOW_TRUST_HIGH_DEPOSIT"]
+            DepositB2 -->|"&lt; 70%"| ManualB["MANUAL<br />reasonCode: TIER_B_LOW_TRUST_MANUAL"]
+
+            %% Tier A Branch
+            CheckTier -->|"Tier A<br />(High Risk)"| TierA{"TrustBand?"}
+            TierA -->|"LOW"| RejectA["REJECT<br />reasonCode: TIER_A_LOW_TRUST_REJECT"]
+            TierA -->|"Other"| ManualA["MANUAL<br />reasonCode: TIER_A_MANUAL<br />deadline: +2h"]
+
+            %% Final states
+            AutoC --> StatusAuto["Status: SIGNED_UNPAID<br />approvalMode: AUTO"]
+            AutoB1 --> StatusAuto
+            AutoB2 --> StatusAuto
+
+            ReviewC --> StatusReview["Status: SIGNED_PENDING_APPROVAL<br />approvalMode: REVIEW"]
+            ReviewB --> StatusReview
+            ReviewB2 --> StatusReview
+
+            ManualB --> StatusManual["Status: SIGNED_PENDING_APPROVAL<br />approvalMode: MANUAL"]
+            ManualA --> StatusManual
+
+            Reject1 --> StatusReject["Status: REJECTED"]
+            RejectA --> StatusReject
+
+            %% Styles
+            classDef autoClass fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
+            classDef reviewClass fill:#fff9c4,stroke:#f57f17,stroke-width:2px;
+            classDef manualClass fill:#ffccbc,stroke:#d84315,stroke-width:2px;
+            classDef rejectClass fill:#ffcdd2,stroke:#c62828,stroke-width:2px;
+
+            class AutoC,AutoB1,AutoB2,StatusAuto autoClass;
+            class ReviewC,ReviewB,ReviewB2,StatusReview reviewClass;
+            class ManualB,ManualA,StatusManual manualClass;
+            class Reject1,RejectA,StatusReject rejectClass;
+        </div>
+
+        <h3 style="color: #2980b9; margin-top: 30px;">10.2. Bảng Ma trận Chính sách (Policy Matrix)</h3>
+        <p class="description">Tóm tắt quyết định dựa trên từng tổ hợp Tier × TrustScore × Deposit Ratio.</p>
+        <div class="mermaid">
+            graph TB
+            subgraph Legend [Chú Giải Kết Quả]
+            Auto["🟢 AUTO = Tự động duyệt ngay"]
+            Review["🟡 REVIEW = Xem xét trong 30 phút"]
+            Manual["🟠 MANUAL = Cần duyệt thủ công (2h)"]
+            Reject["🔴 REJECT = Từ chối"]
+            end
+
+            subgraph TierC_Matrix [Tier C - Sách Rủi Ro Thấp]
+            direction LR
+            TC_Title["<b>TIER C</b><br />(Sách rủi ro thấp)"]
+            TC1["Trust: CAO<br />Cọc ≥30%<br />→ 🟢 AUTO"]
+            TC2["Trust: TB<br />Cọc ≥30%<br />→ 🟢 AUTO"]
+            TC3["Trust: THẤP<br />Cọc ≥50%<br />→ 🟢 AUTO"]
+            TC4["Trust: THẤP<br />Cọc &lt;50%<br />→ 🟡 REVIEW"]
+            end
+
+            subgraph TierB_Matrix [Tier B - Sách Rủi Ro Trung Bình]
+            direction LR
+            TB_Title["<b>TIER B</b><br />(Sách rủi ro trung bình)"]
+            TB1["Trust: CAO<br />Cọc ≥30%<br />→ 🟢 AUTO"]
+            TB2["Trust: TB<br />Cọc ≥50%<br />→ 🟢 AUTO"]
+            TB3["Trust: TB<br />Cọc &lt;50%<br />→ 🟡 REVIEW"]
+            TB4["Trust: THẤP<br />Cọc ≥70%<br />→ 🟡 REVIEW"]
+            TB5["Trust: THẤP<br />Cọc &lt;70%<br />→ 🟠 MANUAL"]
+            end
+
+            subgraph TierA_Matrix [Tier A - Sách Rủi Ro Cao]
+            direction LR
+            TA_Title["<b>TIER A</b><br />(Sách rủi ro cao)"]
+            TA1["Trust: CAO/TB<br />Bất kỳ mức cọc<br />→ 🟠 MANUAL"]
+            TA2["Trust: THẤP<br />Bất kỳ mức cọc<br />→ 🔴 REJECT"]
+            end
+
+            subgraph TrustCalc [Cách tính TrustScore]
+            direction TB
+            TCalc["Điểm = 50<br />+ 10 × min(thuê_xong, 5)<br />- 20 × tranh_chấp<br />- 10 × trả_muộn<br /><br />CAO:
+            ≥80<br />TB: 50-79<br />THẤP: &lt;50"]
+            end
+
+            %% Styles
+            classDef tierStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000;
+            classDef legendStyle fill:#fff,stroke:#666,stroke-width:1px,color:#000;
+            classDef calcStyle fill:#fffde7,stroke:#f9a825,stroke-width:2px,color:#000;
+
+            class TC_Title,TB_Title,TA_Title tierStyle;
+            class TC1,TC2,TC3,TC4,TB1,TB2,TB3,TB4,TB5,TA1,TA2 legendStyle;
+            class TCalc calcStyle;
+            class Auto,Review,Manual,Reject legendStyle;
+        </div>
+
+        <h3 style="color: #2980b9; margin-top: 30px;">10.3. Xử lý Timeout và SLA</h3>
+        <div class="mermaid">
+            sequenceDiagram
+            autonumber
+
+            participant User as Renter
+            participant BE as Backend
+            participant Worker as Cron Worker
+            participant Admin as Administrator
+
+            Note over User,Admin: Trường hợp AUTO
+            User->>BE: Ký Điều Khoản
+            BE->>BE: Policy → AUTO
+            BE-->>User: Trạng thái: SIGNED_UNPAID<br />Hạn lấy: +60m
+            Note over User: Người dùng thanh toán trong 60 phút
+
+            rect rgb(255, 248, 220)
+            Note over User,Admin: Trường hợp REVIEW
+            User->>BE: Ký Điều Khoản
+            BE->>BE: Policy → REVIEW
+            BE-->>User: Trạng thái: SIGNED_PENDING_APPROVAL<br />Hạn xem xét: +30m
+            Worker->>BE: Chạy runReview() mỗi 5 phút
+            alt Duyệt Thành Công
+            BE->>BE: reviewState = PASSED
+            BE-->>User: Trạng thái: SIGNED_UNPAID
+            else Duyệt Thất Bại hoặc Timeout &gt; 30m
+            BE->>BE: reviewState = FAILED
+            BE-->>User: Trạng thái: EXPIRED/REJECTED
+            BE->>BE: Giải phóng giữ sách + Hoàn tiền nếu đã trả tiền
+            end
+            end
+
+            rect rgb(255, 240, 245)
+            Note over User,Admin: Trường hợp MANUAL
+            User->>BE: Ký Điều Khoản
+            BE->>BE: Policy → MANUAL
+            BE-->>User: Trạng thái: SIGNED_PENDING_APPROVAL<br />Hạn duyệt: +2h
+            Admin->>BE: Duyệt Yêu Cầu
+            BE->>BE: Kiểm tra hạn chưa qua
+            alt Duyệt trước deadline
+            BE-->>User: Trạng thái: SIGNED_UNPAID
+            else Timeout &gt; 2h (không có hành động)
+            Worker->>BE: Booking Hết Hạn
+            BE-->>User: Trạng thái: EXPIRED
+            BE->>BE: Giải phóng giữ + Thông báo
+            end
+            end
+        </div>
+    </div>
+
+    <!-- 11. Contract Generator -->
+    <div class="diagram-container">
+        <h2>11. Quy trình Tạo Hợp Đồng (Contract Generator Module)</h2>
+        <p class="description">Quy trình sinh hợp đồng động từ Template, điền biến, hash SHA-256 (cho SBT) và lưu trữ
+            tạm thời
+            (TTL).</p>
+        <div class="mermaid">
+            flowchart TD
+            classDef process fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+            classDef storage fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
+            classDef output fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
+
+            subgraph Inputs [Dữ liệu Đầu vào]
+            Template["Template Hợp Đồng<br />(Markdown + Variables)"]
+            Data["Metadata Thuê<br />(User, Book, Dates)"]
+            Config["Config JSON<br />(Mặc định, Phí)"]
+            end
+
+            subgraph Generator [Module Tạo Hợp Đồng]
+            Fill["Điền biến (Lấp đầy vị trí)"]
+            Hash["Tính TermsHash (SHA-256)"]
+            UUID["Tạo Preview ID (UUIDv4)"]
+            end
+
+            subgraph TempStore [Bộ nhớ đệm - TempStore.js]
+            Store["In-Memory Map<br />Key: PreviewID<br />Value: Nội dung + Hash"]
+            end
+
+            subgraph Outputs [Kết quả & Hành Động]
+            PreviewAPI["GET /api/contracts/:id"]
+            AcceptAPI["POST /api/contracts/:id/accept"]
+            end
+
+            Template --> Fill
+            Data --> Fill
+            Config --> Fill
+            Fill -- "Raw Content" --> Hash
+            Fill -- "Content" --> UUID
+            Hash --> UUID
+            UUID --> Store
+
+            Store -. "Read" .-> PreviewAPI
+            AcceptAPI -- "Update Status" --> Store
+            AcceptAPI -- "Return Hash & ID" --> BackendFlow["RentalController"]
+
+            class Fill,Hash,UUID process
+            class Store storage
+            class PreviewAPI,AcceptAPI output
+        </div>
+    </div>
+
+    <!-- 12. Blockchain Explorer -->
+    <div class="diagram-container">
+        <h2>12. Kiến trúc Blockchain Explorer (SuChinDB Explorer)</h2>
+        <p class="description">Công cụ tra cứu dữ liệu on-chain, sử dụng Service Layer để gọi JSON-RPC.</p>
+        <div class="mermaid">
+            graph LR
+            subgraph Frontend [Giao diện Explorer]
+            ExplorerUI["Các Trang Explorer<br />(Dashboard, Sự kiện)"]
+            Service["ExplorerService<br />(ethers.JsonRpcProvider)"]
+            end
+
+            subgraph Node [Giao diện Node Blockchain]
+            RPC["JSON-RPC Interface<br />Port: 8545"]
+            Ledger["Dữ Liệu Block<br />(Trạng thái Chuỗi)"]
+            Events["Logs Sự Kiện<br />(Bộ lọc Topic)"]
+            end
+
+            ExplorerUI --> Service
+            Service -->|"getBlock, getLogs"| RPC
+            RPC --> Ledger
+            RPC --> Events
+
+            classDef ui fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+            classDef node fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+
+            class ExplorerUI,Service ui;
+            class RPC,Ledger,Events node;
+        </div>
+    </div>
+
+    <!-- 13. BookAsset State Machine (from EXTRACTED_LOGIC.md) -->
+    <div class="diagram-container">
+        <h2>13. State Machine — BookAsset (On-Chain)</h2>
+        <p class="description">Máy trạng thái NFT sách trên blockchain. Nguồn: EXTRACTED_LOGIC.md (Workflow
+            Master_PhanTichChuyenGiao).</p>
+        <div class="mermaid">
+            stateDiagram-v2
+            [*] --> PendingVerification : safeMint()
+            PendingVerification --> Verified : verifyForListing()\n(onlyOwner)
+            Verified --> Rented : markAsRented()\n(owner OR rentalContract)
+            Rented --> Verified : verifyReturn(notDamaged)
+            Rented --> PendingVerification : verifyReturn(isDamaged)
+
+            note right of PendingVerification
+            Sách mới tải lên
+            chờ Admin duyệt
+            end note
+
+            note right of Verified
+            Sẵn sàng cho thuê
+            verifyPreRent() kiểm tra
+            end note
+
+            note right of Rented
+            Đang được thuê
+            ERC-4907 setUser active
+            end note
+        </div>
+    </div>
+
+    <!-- 14. EvidencePack State Machine (from EXTRACTED_LOGIC.md) -->
+    <div class="diagram-container">
+        <h2>14. State Machine — EvidencePack (VinaLibVault On-Chain)</h2>
+        <p class="description">Trạng thái bằng chứng thuê trên smart contract. Nguồn: EXTRACTED_LOGIC.md.</p>
+        <div class="mermaid">
+            stateDiagram-v2
+            [*] --> Active : createRental()\n+ Ghi nhận existingSbtId
+            Active --> ReturnRequested : requestReturn()\n(renter OR owner)
+            ReturnRequested --> Concluded : confirmReturn()\n(onlyOwner)
+            Active --> Concluded : confirmReturn()\n(Admin shortcut)
+
+            note right of Active
+            EvidencePack lưu:
+            termsHash, version,
+            pspRef, renter, timestamp
+            end note
+
+            note right of Concluded
+            isDamaged flag
+            notes ghi chú
+            Sách trả về Verified/Pending
+            end note
+        </div>
+    </div>
+
+    <!-- 15. Booking State Machine (Off-Chain) — from EXTRACTED_LOGIC.md -->
+    <div class="diagram-container">
+        <h2>15. State Machine — Booking (Off-Chain, 7 Trạng Thái)</h2>
+        <p class="description">Vòng đời đầy đủ của một đơn thuê trong backend. Nguồn: EXTRACTED_LOGIC.md +
+            BÁO_CÁO_PHÂN_TÍCH_V3.md.</p>
+        <div class="mermaid">
+            flowchart TD
+            classDef pending fill:#fff9c4,stroke:#f57f17,stroke-width:2px;
+            classDef signed fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+            classDef paid fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
+            classDef done fill:#e0f7fa,stroke:#006064,stroke-width:2px;
+            classDef rejected fill:#ffcdd2,stroke:#c62828,stroke-width:2px;
+
+            Start(["POST /api/booking"]) --> PA[PENDING_ACCEPTANCE]:::pending
+
+            PA --> |"User xem preview → accept"| PolicyCheck{"Policy Engine"}
+
+            PolicyCheck --> |REJECT| Deleted["Booking DELETED"]:::rejected
+            PolicyCheck --> |AUTO| SU["SIGNED_UNPAID<br />+ SBT minted"]:::signed
+            PolicyCheck --> |REVIEW / MANUAL| SPA[SIGNED_PENDING_APPROVAL]:::pending
+
+            SPA --> |"Admin approve"| SU
+            SPA --> |"Timeout (30m/2h)"| Expired[EXPIRED]:::rejected
+
+            SU --> |"pay-wallet"| PAID["PAID<br />+ Blockchain sync"]:::paid
+
+            PAID --> |"return-request"| RR[RETURN_REQUESTED]:::pending
+
+            RR --> |"Admin confirm-return"| COMPLETED["COMPLETED<br />Settlement done"]:::done
+        </div>
+    </div>
+
+    <!-- 16. Dòng Tiền Escrow (from EXTRACTED_LOGIC.md) -->
+    <div class="diagram-container">
+        <h2>16. Dòng Tiền Off-Chain Escrow</h2>
+        <p class="description">Luồng tiền từ Renter → Escrow → Revenue (Platform 10%) + PendingPayout (Lender 90%).
+            Nguồn: EXTRACTED_LOGIC.md.</p>
+        <div class="mermaid">
+            flowchart LR
+            classDef renter fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+            classDef escrow fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+            classDef platform fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+            classDef lender fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
+
+            RB["Renter Balance<br />(Ví người thuê)"]:::renter
+            ESC["Escrow Balance<br />(Giữ tạm)"]:::escrow
+            REV["Revenue Balance<br />(Platform 10%)"]:::platform
+            PP["PendingPayout<br />(Lender 90%)"]:::lender
+            LB["Lender Balance<br />(Ví chủ sách)"]:::lender
+
+            RB -->|"pay-wallet<br />price = book.price"| ESC
+            ESC -->|"confirm-return<br />platformFee = price × 10%"| REV
+            ESC -->|"confirm-return<br />lenderAmount = price × 90%"| PP
+            PP -->|"Admin payout<br />/api/admin/payout"| LB
+        </div>
+    </div>
+
+
+
+    <!-- 17. Blockchain Sync Flow (from EXTRACTED_LOGIC.md) -->
+    <div class="diagram-container">
+        <h2>17. Luồng Blockchain Sync & SBT Evidence (v3.0)</h2>
+        <p class="description">Thứ tự mint SBT và lưu Evidence on-chain sau khi fix CF-1. Nguồn: EXTRACTED_LOGIC.md +
+            BÁO_CÁO_PHÂN_TÍCH_V3.md.</p>
+        <div class="mermaid">
+            sequenceDiagram
+            autonumber
+
+            participant User as Renter
+            participant BE as Backend
+            participant SBT as RentalAgreementSBT
+            participant Vault as VinaLibVault
+            participant Book as BookAsset
+
+            rect rgb(240, 248, 255)
+            Note over User,Book: Bước 1: Ký hợp đồng (Contract Accept)
+            User->>BE: POST /contracts/:id/accept
+            BE->>BE: PolicyEngine.decide()
+            alt AUTO
+            BE->>SBT: safeMint(renter, termsHash)
+            SBT-->>BE: SBT ID #1
+            BE->>BE: booking.rentalSBTId = #1
+            BE-->>User: SIGNED_UNPAID
+            else MANUAL/REVIEW
+            BE-->>User: SIGNED_PENDING_APPROVAL
+            Note over BE: Admin approve → mint SBT tương tự
+            end
+            end
+
+            rect rgb(240, 255, 240)
+            Note over User,Book: Bước 2: Thanh toán (Payment Sync)
+            User->>BE: POST /booking/:code/pay-wallet
+            BE->>BE: Trừ balance → Escrow
+            BE->>Vault: createRental(..., existingSbtId=#1)
+            activate Vault
+            Vault->>Vault: Lưu EvidencePack
+            Vault->>Vault: rentalToSBT[bookId] = #1
+            Vault->>Book: verifyPreRent + setUser
+            Vault-->>BE: Event: RentalCreated
+            deactivate Vault
+            BE-->>User: PAID + txHash
+            end
+
+            rect rgb(255, 240, 245)
+            Note over User,Book: Bước 3: Trả sách
+            User->>BE: return-request
+            BE->>Vault: requestReturn(bookId, deliveryHash)
+            Note over Vault: checkUpkeep() phát hiện ReturnRequested
+            BE->>Vault: confirmReturn(bookId, isDamaged)
+            Vault->>Book: verifyReturn(isDamaged)
+            Vault-->>BE: Event: RentalConcluded
+            BE->>BE: Settlement Escrow
+            BE-->>User: COMPLETED
+            end
+        </div>
+    </div>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</body>
+
+</html>

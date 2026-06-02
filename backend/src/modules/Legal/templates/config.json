@@ -1,0 +1,25 @@
+{
+    "version": 1,
+    "operator": {
+        "name": "Công ty TNHH VinaLib",
+        "taxId": "0123456789",
+        "address": "123 Nguyễn Huệ, Quận 1, TP.HCM",
+        "contact": "support@vinalib.vn | 1900-xxxx"
+    },
+    "defaults": {
+        "lateFeePerDay": 5000,
+        "damageTier1Percent": 10,
+        "damageTier2Percent": 30,
+        "damageTier3Percent": 50,
+        "lostBookFee": 50000,
+        "cancellationFeePercent": 10,
+        "refundDays": 5,
+        "ticketDeadlineDays": 7,
+        "responseHours": 24,
+        "slaDays": 14
+    },
+    "ttl": {
+        "contractPreviewMs": 604800000,
+        "cleanupIntervalMs": 3600000
+    }
+}

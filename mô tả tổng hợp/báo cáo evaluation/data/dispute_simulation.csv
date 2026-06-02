@@ -1,0 +1,11 @@
+Scenario,RunID,TargetCID,IsDetected,LatencyMs,Note
+KT-04,1,bafake_corrupted_hash_1772335185921_1,true,0,Hệ thống phát hiện CID giả mạo — từ chối truy xuất
+KT-04,2,bafake_corrupted_hash_1772335185921_2,true,1,Hệ thống phát hiện CID giả mạo — từ chối truy xuất
+KT-04,3,bafake_corrupted_hash_1772335185922_3,true,0,Hệ thống phát hiện CID giả mạo — từ chối truy xuất
+KT-04,4,bafake_corrupted_hash_1772335185922_4,true,0,Hệ thống phát hiện CID giả mạo — từ chối truy xuất
+KT-04,5,bafake_corrupted_hash_1772335185923_5,true,0,Hệ thống phát hiện CID giả mạo — từ chối truy xuất
+KT-04,6,bafake_corrupted_hash_1772335185923_6,true,0,Hệ thống phát hiện CID giả mạo — từ chối truy xuất
+KT-04,7,bafake_corrupted_hash_1772335185924_7,true,0,Hệ thống phát hiện CID giả mạo — từ chối truy xuất
+KT-04,8,bafake_corrupted_hash_1772335185924_8,true,0,Hệ thống phát hiện CID giả mạo — từ chối truy xuất
+KT-04,9,bafake_corrupted_hash_1772335185925_9,true,0,Hệ thống phát hiện CID giả mạo — từ chối truy xuất
+KT-04,10,bafake_corrupted_hash_1772335185925_10,true,0,Hệ thống phát hiện CID giả mạo — từ chối truy xuất

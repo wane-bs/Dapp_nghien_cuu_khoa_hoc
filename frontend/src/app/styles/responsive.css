@@ -1,0 +1,375 @@
+/* ===========================================
+   RESPONSIVE CSS - VINALIB VAULT
+   Mobile-First Breakpoints & Utilities
+   =========================================== */
+
+/* ===== BREAKPOINTS =====
+   Mobile:   < 768px (default/base)
+   Tablet:   768px - 1024px
+   Desktop:  > 1024px
+   ======================== */
+
+/* ===== RESPONSIVE CONTAINER ===== */
+.container-responsive {
+    width: 100%;
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .container-responsive {
+        max-width: 720px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container-responsive {
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .container-responsive {
+        max-width: 1200px;
+    }
+}
+
+/* ===== GRID SYSTEM ===== */
+.grid {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr);
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Responsive Grid */
+@media (min-width: 768px) {
+    .md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .md\:grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .lg\:grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .lg\:grid-cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ===== FLEXBOX UTILITIES ===== */
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.gap-sm {
+    gap: var(--spacing-sm);
+}
+
+.gap-md {
+    gap: var(--spacing-md);
+}
+
+.gap-lg {
+    gap: var(--spacing-lg);
+}
+
+/* ===== DISPLAY UTILITIES ===== */
+.hidden {
+    display: none;
+}
+
+.block {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .md\:hidden {
+        display: none;
+    }
+
+    .md\:block {
+        display: block;
+    }
+
+    .md\:flex {
+        display: flex;
+    }
+}
+
+@media (min-width: 1024px) {
+    .lg\:hidden {
+        display: none;
+    }
+
+    .lg\:block {
+        display: block;
+    }
+
+    .lg\:flex {
+        display: flex;
+    }
+}
+
+/* ===== MOBILE NAVIGATION ===== */
+.mobile-nav-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-white);
+    font-size: 24px;
+}
+
+@media (min-width: 768px) {
+    .mobile-nav-toggle {
+        display: none;
+    }
+}
+
+/* Mobile Menu Overlay */
+.mobile-menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition-normal);
+}
+
+.mobile-menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile Sidebar */
+.mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    background: var(--color-white);
+    z-index: 1000;
+    transition: left var(--transition-normal);
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+}
+
+.mobile-sidebar.active {
+    left: 0;
+}
+
+@media (min-width: 768px) {
+    .mobile-sidebar {
+        position: static;
+        width: auto;
+        height: auto;
+        box-shadow: none;
+        background: transparent;
+    }
+}
+
+/* ===== RESPONSIVE TYPOGRAPHY ===== */
+.text-responsive-sm {
+    font-size: var(--font-size-sm);
+}
+
+.text-responsive-base {
+    font-size: var(--font-size-base);
+}
+
+@media (min-width: 768px) {
+    .text-responsive-base {
+        font-size: var(--font-size-lg);
+    }
+}
+
+.text-responsive-lg {
+    font-size: var(--font-size-lg);
+}
+
+@media (min-width: 768px) {
+    .text-responsive-lg {
+        font-size: var(--font-size-xl);
+    }
+}
+
+.text-responsive-xl {
+    font-size: var(--font-size-xl);
+}
+
+@media (min-width: 768px) {
+    .text-responsive-xl {
+        font-size: var(--font-size-2xl);
+    }
+}
+
+/* ===== RESPONSIVE SPACING ===== */
+.p-responsive {
+    padding: var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+    .p-responsive {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (min-width: 1024px) {
+    .p-responsive {
+        padding: var(--spacing-lg);
+    }
+}
+
+/* ===== RESPONSIVE CARDS ===== */
+.card-responsive {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+}
+
+@media (min-width: 768px) {
+    .card-responsive {
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn var(--transition-normal);
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft var(--transition-normal);
+}
+
+.animate-slide-in-up {
+    animation: slideInUp var(--transition-normal);
+}
+
+/* ===== SKELETON LOADING ===== */
+@keyframes skeleton-loading {
+    0% {
+        background-position: -200px 0;
+    }
+
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg,
+            var(--color-gray-200) 0%,
+            var(--color-gray-100) 50%,
+            var(--color-gray-200) 100%);
+    background-size: 200px 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+    height: 1em;
+    margin-bottom: 0.5em;
+}
+
+.skeleton-text-sm {
+    height: 0.8em;
+    width: 60%;
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.skeleton-card {
+    height: 150px;
+    border-radius: var(--radius-md);
+}
+
+.skeleton-button {
+    height: 36px;
+    width: 100px;
+    border-radius: var(--radius-sm);
+}

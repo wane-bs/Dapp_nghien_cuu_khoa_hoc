@@ -1,0 +1,40 @@
+{
+    "project": "VinaLib",
+    "components": [
+        {
+            "name": "BookAsset",
+            "status": "KEEP",
+            "abi_snapshot": [
+                "function safeMint(address to, string memory cid) public onlyOwner",
+                "function verifyForListing(uint256 tokenId) external onlyOwner",
+                "function verifyPreRent(uint256 tokenId) external onlyOwner returns (bool)",
+                "function markAsRented(uint256 tokenId) external",
+                "function verifyReturn(uint256 tokenId, bool isDamaged) external",
+                "function isVerified(uint256 tokenId) external view returns (bool)",
+                "function getBookStatus(uint256 tokenId) external view returns (uint8)"
+            ]
+        },
+        {
+            "name": "RentalAgreementSBT",
+            "status": "KEEP",
+            "abi_snapshot": [
+                "function safeMint(address to, bytes32 termsHash) public",
+                "function rentalTerms(uint256 tokenId) public view returns (bytes32)"
+            ]
+        },
+        {
+            "name": "VinaLibVault",
+            "status": "KEEP",
+            "abi_snapshot": [
+                "function createRental(address user, uint256 bookTokenId, uint64 duration, bytes32 termsHash, uint16 version, string memory pspRef, uint256 existingSbtId) external nonReentrant",
+                "function requestReturn(uint256 bookTokenId, bytes32 deliveryHash) external nonReentrant",
+                "function confirmReturn(uint256 bookTokenId, bool isDamaged, string memory notes) external nonReentrant",
+                "function cancelListing(uint256 bookTokenId) external nonReentrant",
+                "function claimCollateral(uint256 bookTokenId, string memory reason) external nonReentrant",
+                "function calculateRemainingTime(uint256 bookTokenId) external view returns (uint256)",
+                "function isAvailable(uint256 bookTokenId) external view returns (bool)",
+                "function getRentalInfo(uint256 bookTokenId) external view returns (bytes32 termsHash, bytes32 deliveryHash, address renter, uint16 version, uint8 status, uint256 timestamp, string memory pspRef)"
+            ]
+        }
+    ]
+}

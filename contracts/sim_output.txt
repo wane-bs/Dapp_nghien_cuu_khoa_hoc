@@ -1,0 +1,7 @@
+=== STARTING DSR SIMULATION (STEP 2) ===
+[INFO] Using Fallback Gas Price: $35.0/AVAX
+-> Running KT-01: Baseline Flow (100 Transactions Batch)
+   -> Control Flow Minting Done. Ownership transferred to Vault.
+-> Running Rental Creation Flow...
+-> Running KT-02: Stress Test (Concurrent Batch of 50)
+-> DSR Simulation Complete. Results saved to transaction_logs.csv

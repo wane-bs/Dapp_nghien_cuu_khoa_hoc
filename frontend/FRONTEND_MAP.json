@@ -1,0 +1,95 @@
+{
+    "project_type": "React SPA (TypeScript)",
+    "frameworks": [
+        "React 19",
+        "React Router 7",
+        "Ethers 6.16",
+        "TailwindCSS (Implied via CSS/Structure)"
+    ],
+    "architecture": "Feature-Sliced Design (app, entities, features, pages, shared, widgets)",
+    "entry_point": "src/index.tsx -> src/app/App.tsx",
+    "pages_and_routes": [
+        {
+            "path": "/login, /register",
+            "component_dir": "src/pages/login, src/pages/register",
+            "interactions": [
+                "User authentication"
+            ]
+        },
+        {
+            "path": "/dashboard",
+            "component_dir": "src/pages/home",
+            "interactions": [
+                "View book listings"
+            ]
+        },
+        {
+            "path": "/books/:id",
+            "component_dir": "src/pages/book-detail",
+            "interactions": [
+                "View book details",
+                "Initiate rent process",
+                "Return book"
+            ]
+        },
+        {
+            "path": "/rent-out",
+            "component_dir": "src/pages/rent-out",
+            "interactions": [
+                "List new book for rent"
+            ]
+        },
+        {
+            "path": "/lender-manage",
+            "component_dir": "src/pages/lender-manage",
+            "interactions": [
+                "Manage listed books",
+                "Confirm returns",
+                "Cancel listings",
+                "Claim collateral"
+            ]
+        },
+        {
+            "path": "/owner",
+            "component_dir": "src/pages/admin",
+            "interactions": [
+                "Admin dashboard (Multi-sig/Gnosis Safe UI)",
+                "View Threshold status and Safe Owners",
+                "View and sign Pending Approvals (Transaction Proposals)",
+                "Verify books for listing (verifyForListing)",
+                "Manage disputes"
+            ]
+        },
+        {
+            "path": "/wallet",
+            "component_dir": "src/pages/wallet",
+            "interactions": [
+                "Connect Web3 Wallet",
+                "View balances"
+            ]
+        },
+        {
+            "path": "/explorer/*",
+            "component_dir": "src/pages/explorer",
+            "interactions": [
+                "View blockchain network state",
+                "View blocks/txs/events"
+            ]
+        },
+        {
+            "path": "/contract-preview/:previewId",
+            "component_dir": "src/pages/contract-preview",
+            "interactions": [
+                "Preview rental terms hash before mining"
+            ]
+        }
+    ],
+    "web3_integration_points": [
+        "src/shared/hooks/useWeb3.ts (Expected to implement web3 conn)",
+        "src/shared/web3/safe_deployments.json (Safe contract config)",
+        "src/features/wallet-connect/ (Expected to implement connect button)",
+        "src/pages/lender-manage/ (Needs call to createRental, confirmReturn, cancelListing)",
+        "src/pages/book-detail/ (Needs call to requestReturn)",
+        "src/pages/admin/ (Needs Safe SDK integration for multi-sig interactions)"
+    ]
+}

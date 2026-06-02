@@ -1,0 +1,182 @@
+{
+  "project": "VinaLib-Vault",
+  "version": "3.2",
+  "last_updated": "2026-02-26T21:26:57+07:00",
+  "workflow_outputs": {
+    "Master_PhanTichChuyenGiao": {
+      "date": "2026-02-19",
+      "artifacts": [
+        "TECHNICAL_INVENTORY.json",
+        "EXTRACTED_LOGIC.md",
+        "PROJECT_MANIFEST_REFACTORED.json",
+        "BASE_DESIGN_SPEC.md"
+      ],
+      "compatibility_gates": {
+        "Gate1_CoreEngine": "PASS",
+        "Gate2_Storage": "PASS",
+        "Gate3_Interface": "PASS"
+      },
+      "gaps_found": 8
+    },
+    "Master_KienTrucThietKe": {
+      "date": "2026-02-19",
+      "gaps_fixed": 7,
+      "gaps_deferred": 1,
+      "test_result": "24/24 PASS"
+    },
+    "quy-trinh-tham-dinh-ke-hoach": {
+      "date": "2026-02-23",
+      "status": "APPROVED WITH REVISIONS",
+      "artifacts": [
+        "BAO_CAO_THAM_DINH_KE_HOACH.md"
+      ],
+      "notes": "DSR test plan approved with architecture, resource, and dependency refinements."
+    },
+    "QuyTrinhKiemDinhVaXacThuc": {
+      "date": "2026-02-24",
+      "status": "APPROVED",
+      "artifacts": [
+        "BAO_CAO_KIEM_DINH_XAC_THUC.md"
+      ],
+      "notes": "Codebase frozen. 38/38 tests passed. Integrates dynamic IPFS CID simulator. Smart Contract, Logic, and Fintech validated."
+    },
+    "quy-trinh-kiem-dinh-vinalib-vault": {
+      "date": "2026-02-25",
+      "status": "PASS",
+      "artifacts": [
+        "BAO_CAO_EVALUATION.md",
+        "PHU_LUC_DATASET_DSR.csv"
+      ],
+      "metrics": {
+        "cost_per_rental": "$0.02 USD (585,000 Gas)",
+        "ipfs_latency": "0.13 ms",
+        "dispute_resolution_rate": "100%",
+        "access_control_breach": "0"
+      },
+      "conclusion": "DSR Standards (O1, O2, O3) achieved. Simulation workflows completed."
+    },
+    "QuyTrinhPhanTichDApp": {
+      "date": "2026-02-28",
+      "status": "PASS",
+      "mode": "REVIEW_UPDATE",
+      "artifacts": [
+        "BÁO_CÁO_PHÂN_TÍCH_DAPP_V3.1.md"
+      ],
+      "metrics": {
+        "createRental_gas": "150k - 180k Gas",
+        "confirmReturn_gas": "100k - 120k Gas"
+      },
+      "conclusion": "Technical deconstruction and documentation update for V3.1 completed successfully. Business flows and DFD integrated."
+    }
+  },
+  "smart_contracts": {
+    "BookAsset": {
+      "path": "contracts/contracts/BookAsset.sol",
+      "standard": "ERC-4907 + ERC-721",
+      "states": [
+        "PendingVerification",
+        "Verified",
+        "Rented",
+        "Returned"
+      ],
+      "classification": "KEEP"
+    },
+    "RentalAgreementSBT": {
+      "path": "contracts/contracts/RentalAgreementSBT.sol",
+      "standard": "ERC-721 Soulbound",
+      "note": "Transfer blocked \u2014 Soulbound",
+      "classification": "KEEP"
+    },
+    "VinaLibVault": {
+      "path": "contracts/contracts/VinaLibVault.sol",
+      "integrations": [
+        "Chainlink Functions",
+        "Chainlink Automation"
+      ],
+      "changes_v3": [
+        "createRental() modified to be called directly by User (removed onlyOwner)",
+        "Implemented Chainlink Automation (checkUpkeep/performUpkeep) for expired rental cleanup",
+        "createRental() now receives existingSbtId (CF-1 fix)",
+        "checkUpkeep() iterates activeRentalBookIds (CF-4 fix)",
+        "fulfillRequest() emits FunctionFulfilled event (CF-4 fix)",
+        "Added rentalToSBT mapping",
+        "Added activeRentalBookIds array for iteration",
+        "cancelListing() and claimCollateral() functions updated for asset status transition"
+      ],
+      "classification": "REFACTOR"
+    }
+  },
+  "backend_modules": {
+    "PolicyEngine": {
+      "outcomes": [
+        "AUTO",
+        "REVIEW",
+        "MANUAL",
+        "REJECT"
+      ],
+      "classification": "KEEP"
+    },
+    "BlockchainAdapter": {
+      "new_functions": [
+        "resolveTokenId",
+        "getBookStatus",
+        "mintRentalSBT",
+        "syncRentalToBlockchain"
+      ],
+      "env_change": "ADMIN_PRIVATE_KEY from process.env",
+      "classification": "REFACTOR"
+    },
+    "BookController": {
+      "new_routes": [
+        "GET /api/books/:id/chain-status"
+      ],
+      "classification": "REFACTOR"
+    },
+    "RentalController": {
+      "key_routes": [
+        "POST /:code/approve",
+        "POST /:code/return-request",
+        "POST /:code/return-confirm"
+      ],
+      "classification": "KEEP"
+    },
+    "AdminController": {
+      "key_routes": [
+        "POST /books/:id/verify-listing",
+        "POST /books/:id/verify-pre-rent",
+        "POST /booking/:code/confirm-return"
+      ],
+      "classification": "KEEP"
+    }
+  },
+  "frontend_structure": {
+    "key_pages": [
+      "contract-preview",
+      "explorer",
+      "lender-manage",
+      "rent-out (modified: moved on-chain mint out to admin)",
+      "wallet",
+      "admin (modified: added Mint tab for Custodial book creation)",
+      "book-detail"
+    ],
+    "new_hooks_and_apis": [
+      "shared/api/contracts.ts",
+      "shared/hooks/useBookOnChainStatus.ts"
+    ]
+  },
+  "security_improvements": [
+    "Private key moved to .env",
+    "verifyUser middleware on /api/booking",
+    "verifyUser middleware on /api/contracts",
+    "verifyUser middleware on /api/policy",
+    ".gitignore excludes .env",
+    "Smart Contract ReentrancyGuard added to Vault"
+  ],
+  "known_issues": [
+    {
+      "id": "P2-1",
+      "severity": "LOW",
+      "description": "In-memory store not resilient \u2014 deferred to Phase 2 (database migration)"
+    }
+  ]
+}

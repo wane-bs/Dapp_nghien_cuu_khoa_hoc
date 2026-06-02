@@ -1,0 +1,33 @@
+# Node modules
+node_modules/
+
+# Environment Variables (Khóa cứng API, Private Keys)
+.env
+.env.*
+!.env.example
+
+# Build, Artifacts & Caches
+build/
+artifacts/
+cache/
+coverage/
+coverage.json
+typechain/
+typechain-types/
+
+# Logs, Backups & Debug Scripts
+*.log
+*.bak
+*.old
+frontend/ts_errors.txt
+contracts/sim_error.txt
+contracts/transaction_logs.csv
+contracts/dsr_test_evidence.txt
+contracts/dispute_simulation.csv
+contracts/diagnosis.txt
+contracts/coverage_output.txt
+scripts/debug_rental.js
+
+# OS Files
+.DS_Store
+Thumbs.db

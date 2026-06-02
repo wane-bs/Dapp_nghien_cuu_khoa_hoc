@@ -1,0 +1,12 @@
+# Widgets Layer - Phase 2 (Feature-Sliced Design)
+# 
+# Sẽ chứa các UI blocks lớn độc lập khi team design ready:
+# - Header/
+# - Sidebar/
+# - BookCard/
+# - Footer/
+# 
+# Quy tắc:
+# - Widgets compose từ Shared UI components
+# - Không chứa business logic
+# - Có thể import từ: entities/, shared/

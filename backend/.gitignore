@@ -1,0 +1,21 @@
+# CF-2 FIX: .gitignore cho backend — KHÔNG commit private keys hay secrets
+
+# Environment variables (chứa ADMIN_PRIVATE_KEY và secrets)
+.env
+.env.local
+.env.production
+
+# Node modules
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+*.pid
+*.seed
+
+# Store / Persistence files (auto-generated, not source code)
+shared_store.json
+books_store.json

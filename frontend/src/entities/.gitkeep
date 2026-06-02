@@ -1,0 +1,13 @@
+# Entities Layer - Phase 2 (Feature-Sliced Design)
+# 
+# Sẽ chứa các domain models khi team design ready:
+# - User/           (User model, userApi)
+# - Book/           (Book model, bookApi)
+# - Rental/         (Rental/Booking model)
+# - Wallet/         (Wallet state, balance)
+# 
+# Quy tắc:
+# - Entities là pure domain models
+# - Không chứa UI logic
+# - Có thể import từ: shared/
+# - KHÔNG được import từ: features/, widgets/, pages/

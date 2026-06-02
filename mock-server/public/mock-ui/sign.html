@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPT eContract Simulator</title>
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            padding: 2rem;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .contract {
+            background: white;
+            padding: 3rem;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        h1,
+        h2 {
+            color: #1a1a1a;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .contract-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 6px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .contract-section h3 {
+            margin-top: 0;
+            color: #1976D2;
+            font-size: 1.1em;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .value {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .stamp {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            border: 4px solid #d32f2f;
+            color: #d32f2f;
+            font-weight: 900;
+            padding: 15px 30px;
+            transform: rotate(-15deg);
+            font-size: 28px;
+            display: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        button {
+            background: #1976D2;
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 50px;
+            display: block;
+            margin: 40px auto 10px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(33, 150, 243, 0.3);
+        }
+
+        button:hover {
+            background: #1565C0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="contract">
+        <h1>HỢP ĐỒNG THUÊ SÁCH ĐIỆN TỬ</h1>
+
+        <div style="text-align: center; margin-bottom: 30px; color: #666; font-size: 0.9em;">
+            Mã Hợp Đồng: <strong><span id="bookingCode">Loading...</span></strong> |
+            Hash: <span id="hash" style="font-family: monospace;">Loading...</span>
+        </div>
+
+        <div class="contract-section">
+            <h3>BÊN A (BÊN CHO THUÊ - LENDER)</h3>
+            <div class="info-row"><span class="label">Họ và tên:</span> <span class="value" id="lenderName">...</span>
+            </div>
+            <div class="info-row"><span class="label">Địa chỉ ví/ID:</span> <span class="value"
+                    id="lenderAddress">...</span></div>
+            <div class="info-row"><span class="label">Email:</span> <span class="value" id="lenderEmail">...</span>
+            </div>
+        </div>
+
+        <div class="contract-section">
+            <h3>BÊN B (BÊN THUÊ - RENTER)</h3>
+            <div class="info-row"><span class="label">Họ và tên:</span> <span class="value" id="renterName">...</span>
+            </div>
+            <div class="info-row"><span class="label">Địa chỉ ví/ID:</span> <span class="value"
+                    id="renterAddress">...</span></div>
+            <div class="info-row"><span class="label">Email:</span> <span class="value" id="renterEmail">...</span>
+            </div>
+        </div>
+
+        <div class="contract-section" style="border-left-color: #4CAF50; background: #f1f8e9;">
+            <h3>ĐỐI TƯỢNG HỢP ĐỒNG (SÁCH)</h3>
+            <div class="info-row"><span class="label">Tên sách:</span> <span class="value" id="bookTitle">...</span>
+            </div>
+            <div class="info-row"><span class="label">Tác giả:</span> <span class="value" id="bookAuthor">...</span>
+            </div>
+            <div class="info-row"><span class="label">Giá thuê:</span> <span class="value" style="color: #d32f2f;"><span
+                        id="bookPrice">0</span> VND</span></div>
+        </div>
+
+        <p style="font-size: 0.9em; color: #666; text-align: justify; line-height: 1.5; margin-top: 30px;">
+            Bằng việc nhấn nút "Ký Số" dưới đây, Bên B đồng ý thuê cuốn sách nêu trên từ Bên A theo các điều khoản và
+            điều kiện của VinaLib Vault. Hợp đồng này được bảo đảm bằng Smart Contract và chữ ký số điện tử.
+        </p>
+
+        <button id="signBtn" onclick="signDocument()">✍️ Ký Hợp Đồng (Simulate)</button>
+
+        <div id="stamp" class="stamp">ĐÃ KÝ <br> <span style="font-size:14px">Verified by Mock CA</span></div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const docId = urlParams.get('docId');
+
+        async function loadDocInfo() {
+            if (!docId) return alert("Không tìm thấy Document ID");
+
+            try {
+                const res = await fetch(`/fpt/electronic-sign/doc/${docId}`);
+                if (!res.ok) throw new Error("Load failed");
+                const data = await res.json();
+
+                console.log("Contract Data Loaded:", data); // Debug log
+
+                // Populate Hash
+                document.getElementById('hash').innerText = data.hash ? data.hash.substring(0, 16) + "..." : "N/A";
+
+                const meta = data.metadata || {};
+
+                // Binding Data
+                document.getElementById('bookingCode').innerText = meta.bookingCode || "N/A";
+
+                // Renter
+                if (meta.renter) {
+                    document.getElementById('renterName').innerText = meta.renter.name || "Unknown Renter";
+                    document.getElementById('renterAddress').innerText = meta.renter.address || "N/A";
+                    document.getElementById('renterEmail').innerText = meta.renter.email || "N/A";
+                } else {
+                    document.getElementById('renterName').innerText = "Missing Renter Data";
+                }
+
+                // Lender
+                if (meta.lender) {
+                    document.getElementById('lenderName').innerText = meta.lender.name || "System/Unknown";
+                    document.getElementById('lenderAddress').innerText = meta.lender.address || "N/A";
+                    document.getElementById('lenderEmail').innerText = meta.lender.email || "N/A";
+                } else {
+                    document.getElementById('lenderName').innerText = "Missing Lender Data";
+                }
+
+                // Book
+                if (meta.book) {
+                    document.getElementById('bookTitle').innerText = meta.book.title || "Unknown Book";
+                    document.getElementById('bookAuthor').innerText = meta.book.author || "Unknown Author";
+                    document.getElementById('bookPrice').innerText = meta.book.price?.toLocaleString() || "0";
+                } else {
+                    document.getElementById('bookTitle').innerText = "Missing Book Data";
+                }
+
+                if (data.signed) {
+                    showSignedState();
+                }
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('bookingCode').innerText = "Error loading contract data";
+                document.getElementById('bookingCode').style.color = "red";
+                alert("Không thể tải thông tin hợp đồng. Vui lòng kiểm tra lại Mock Server.");
+            }
+        }
+
+        function showSignedState() {
+            document.getElementById('stamp').style.display = 'block';
+            document.getElementById('signBtn').disabled = true;
+            document.getElementById('signBtn').innerText = "Hợp Đồng Đã Ký";
+            document.getElementById('signBtn').style.background = "#4CAF50";
+        }
+
+        async function signDocument() {
+            if (!docId) return alert("No Document ID provided");
+
+            try {
+                // Simulate processing delay
+                document.getElementById('signBtn').innerText = "Đang xử lý...";
+                document.getElementById('signBtn').disabled = true;
+
+                await new Promise(r => setTimeout(r, 1000));
+
+                const response = await fetch('/internal/approve-doc', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ docId })
+                });
+
+                if (response.ok) {
+                    showSignedState();
+                } else {
+                    alert("Error signing document");
+                    document.getElementById('signBtn').innerText = "✍️ Ký Hợp Đồng (Simulate)";
+                    document.getElementById('signBtn').disabled = false;
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Network error");
+            }
+        }
+
+        loadDocInfo();
+    </script>
+</body>
+
+</html>

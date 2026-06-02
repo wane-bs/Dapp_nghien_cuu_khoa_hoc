@@ -1,0 +1,151 @@
+{
+  "project_name": "VinaLib Blockchain Contracts",
+  "solidity_version": "^0.8.20",
+  "frameworks_and_libraries": [
+    "@openzeppelin/contracts",
+    "@chainlink/contracts"
+  ],
+  "contracts": [
+    {
+      "name": "BookAsset",
+      "inheritance": [
+        "ERC4907",
+        "Ownable",
+        "Pausable"
+      ],
+      "state_variables": [
+        "bookStatuses",
+        "tokenCIDs",
+        "rentalContract",
+        "lastVerifiedAt",
+        "lastVerifiedBy"
+      ],
+      "public_external_functions": [
+        "setRentalContract",
+        "safeMint",
+        "verifyForListing",
+        "verifyPreRent",
+        "markAsRented",
+        "verifyReturn",
+        "isVerified",
+        "getBookStatus",
+        "tokenURI",
+        "pause",
+        "unpause",
+        "setUser"
+      ]
+    },
+    {
+      "name": "ERC4907",
+      "inheritance": [
+        "ERC721",
+        "IERC4907"
+      ],
+      "state_variables": [
+        "_users"
+      ],
+      "public_external_functions": [
+        "setUser",
+        "userOf",
+        "userExpires",
+        "supportsInterface"
+      ]
+    },
+    {
+      "name": "IERC4907",
+      "inheritance": [],
+      "state_variables": [],
+      "public_external_functions": [
+        "setUser",
+        "userOf",
+        "userExpires"
+      ]
+    },
+    {
+      "name": "Mocks (FunctionsRouterMock)",
+      "inheritance": [
+        "IFunctionsRouter"
+      ],
+      "state_variables": [],
+      "public_external_functions": [
+        "sendRequest",
+        "fulfillRequest",
+        "getAllowListId",
+        "setAllowListId",
+        "getAdminFee",
+        "sendRequestToProposed",
+        "fulfill",
+        "isValidCallbackGasLimit",
+        "getContractById",
+        "getProposedContractById",
+        "getProposedContractSet",
+        "proposeContractsUpdate",
+        "updateContracts",
+        "pause",
+        "unpause"
+      ]
+    },
+    {
+      "name": "RentalAgreementSBT",
+      "inheritance": [
+        "ERC721",
+        "Ownable"
+      ],
+      "state_variables": [
+        "rentalTerms",
+        "rentalContract"
+      ],
+      "public_external_functions": [
+        "setRentalContract",
+        "safeMint"
+      ]
+    },
+    {
+      "name": "SuChinToken",
+      "inheritance": [
+        "ERC20",
+        "Ownable"
+      ],
+      "state_variables": [],
+      "public_external_functions": [
+        "mint"
+      ]
+    },
+    {
+      "name": "VinaLibVault",
+      "inheritance": [
+        "FunctionsClient",
+        "AutomationCompatibleInterface",
+        "ReentrancyGuard",
+        "Ownable"
+      ],
+      "state_variables": [
+        "donId",
+        "subscriptionId",
+        "gasLimit",
+        "logs",
+        "lastUpkeepData",
+        "activeRentalBookIds",
+        "bookAssetAddress",
+        "rentalSBTAddress",
+        "activeRentals",
+        "rentalToSBT"
+      ],
+      "public_external_functions": [
+        "setConfig",
+        "sendRequest",
+        "checkUpkeep",
+        "performUpkeep",
+        "setContracts",
+        "createRental",
+        "requestReturn",
+        "confirmReturn",
+        "cancelListing",
+        "claimCollateral",
+        "calculateRemainingTime",
+        "isAvailable",
+        "getRentalInfo"
+      ]
+    }
+  ]
+}
