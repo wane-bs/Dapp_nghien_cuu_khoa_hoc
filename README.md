@@ -35,7 +35,7 @@ book_app_v3/
 │   └── package.json
 ├── mock-server/        # Máy chủ giả lập phục vụ cho quy trình test độc lập
 ├── scripts/            # Các tập lệnh bổ trợ & kiểm thử luồng DSR
-└── LICENSE             # Giấy phép nguồn mở MIT
+└── LICENSE             # Giấy phép Apache License 2.0
 ```
 
 ---
@@ -97,4 +97,4 @@ Dự án được cấu hình bằng hệ thống Git bảo mật nghiêm ngặt
 ---
 
 ## 📄 Giấy phép
-Dự án được phát hành dưới giấy phép [MIT License](file:///f:/book_app_v3/LICENSE).
+Dự án được phát hành dưới giấy phép [Apache License 2.0](file:///f:/book_app_v3/LICENSE).
